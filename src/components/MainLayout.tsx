@@ -3,7 +3,7 @@ import { TopNavigation } from "./TopNavigation";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider } from "./ui/sidebar";
 
-export function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     // 배경: 아주 연한 그라데이션으로 시안의 뽀샤시한 느낌 구현
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900">
