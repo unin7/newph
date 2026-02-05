@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Sparkles, Calendar, Radio, Twitter, Zap, ShoppingBag } from 'lucide-react';
-import { cn } from './utils/common'; // cn 유틸리티가 없다면 className 문자열로 대체 가능
+import { cn } from '../lib/utils'; // cn 유틸리티가 없다면 className 문자열로 대체 가능
 
 const navItems = [
   { path: '/news/schedule', label: '일정', desc: '주요 스케줄', icon: Calendar },
