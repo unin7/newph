@@ -1,24 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { Search, Menu, Smile, Paperclip } from 'lucide-react';
-import { useJsonData } from '../hooks/useJsonData'; // ✅ 경로 수정됨
-import { MessageBubble } from './MessageBubble';
-
-// ✅ 타입 정의 (내부 정의로 변경하여 의존성 제거)
-export interface ChatMessage {
-  id?: number;
-  type: string;
-  name?: string;
-  profileImg?: string;
-  content: string;
-  time?: string;
-  createdAt?: string; // 정렬을 위해 날짜 필드가 있다면 추가 권장
-}
+import { Search, Menu, Smile, Paperclip, Send } from 'lucide-react';
+// ✅ 경로 수정됨: ../hooks
+import { useJsonData } from '../hooks/useJsonData';
+import { MessageBubble, ChatMessage } from './MessageBubble';
 
 interface ChatRoom {
   roomId: string;
   roomName: string;
   roomImg: string;
-  todayPostCount: number;
 }
 
 interface ChatConversationProps {
@@ -28,17 +17,14 @@ interface ChatConversationProps {
 const MAX_MESSAGES = 50; 
 
 export function ChatConversation({ roomId }: ChatConversationProps) {
-  // 데이터 훅 사용
   const { data: chatRooms } = useJsonData<ChatRoom[]>('chat_rooms');
   const { data: messages, loading } = useJsonData<ChatMessage[]>(roomId);
   
   const room = chatRooms?.find(r => r.roomId === roomId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 최신 50개 메시지 자르기
   const displayMessages = messages ? messages.slice(-MAX_MESSAGES) : [];
 
-  // 메시지 로드 시 스크롤 하단 이동
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -46,82 +32,84 @@ export function ChatConversation({ roomId }: ChatConversationProps) {
   }, [messages, roomId]);
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-[#b2c7da] min-w-0 min-h-0">
+    // ✅ 배경색 #b2c7da 적용
+    <div className="flex-1 h-full flex flex-col bg-[#b2c7da] min-w-0 relative">
       
-      {/* 1. 헤더 */}
-      <header className="bg-[#b2c7da]/95 backdrop-blur-sm px-4 py-3 flex justify-between items-center border-b border-black/5 flex-shrink-0 z-10">
+      {/* 헤더 */}
+      <header className="flex-none h-[64px] bg-white/95 backdrop-blur-sm px-5 flex justify-between items-center border-b border-[#dcdcdc] z-20">
         <div className="flex items-center gap-3 min-w-0">
           {room && (
             <img 
               src={room.roomImg} 
               alt={room.roomName} 
-              className="w-9 h-9 rounded-[13px] object-cover shadow-sm cursor-pointer hover:opacity-90"
+              className="w-[42px] h-[42px] rounded-[16px] object-cover border border-black/5 cursor-pointer hover:opacity-90"
             />
           )}
-          <div className="min-w-0">
-            <h2 className="text-gray-900 text-[14px] font-bold truncate">
-              {room ? room.roomName : "채팅방"}
-            </h2>
-            <div className="flex items-center gap-1.5 text-gray-700 opacity-70">
-              <span className="text-[11px]">
-                참여자 {(messages?.length || 0) + 1}
-              </span>
+          <div className="min-w-0 flex flex-col justify-center">
+            <div className="flex items-center gap-1.5">
+                <h2 className="text-[#1e1e1e] text-[15px] font-bold truncate cursor-pointer hover:underline decoration-1 underline-offset-2">
+                {room ? room.roomName : "채팅방"}
+                </h2>
+                <span className="text-[#999] text-xs font-medium pt-0.5 flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-[#bbb]"></span>
+                    {(messages?.length || 0) + 1}
+                </span>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 text-gray-700 opacity-60">
-          <Search size={18} className="cursor-pointer hover:opacity-100" />
-          <Menu size={18} className="cursor-pointer hover:opacity-100" />
+        <div className="flex gap-5 text-[#333]">
+          <Search size={20} strokeWidth={1.5} className="cursor-pointer hover:opacity-60 transition-opacity" />
+          <Menu size={20} strokeWidth={1.5} className="cursor-pointer hover:opacity-60 transition-opacity" />
         </div>
       </header>
 
-      {/* 2. 스크롤 영역 (메시지 리스트) */}
+      {/* 대화 내용 */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-3 py-3 space-y-1 custom-scrollbar"
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-1 custom-scrollbar"
       >
         {loading ? (
-          <div className="text-center text-gray-600 py-8 text-xs">로딩 중...</div>
+          <div className="text-center text-black/30 py-10 text-xs">로딩 중...</div>
         ) : (
           displayMessages.length > 0 ? (
             <>
-              {/* 메시지가 많을 경우 안내 문구 */}
               {messages && messages.length > MAX_MESSAGES && (
-                <div className="text-center py-4 text-xs text-gray-500 opacity-70">
+                <div className="text-center py-6 text-xs text-black/30">
                   이전 대화 불러오기...
                 </div>
               )}
-              
-              {/* 메시지 렌더링 */}
               {displayMessages.map((m, i) => (
                  <MessageBubble key={m.id || i} msg={m} />
               ))}
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm gap-2 opacity-60">
+            <div className="h-full flex flex-col items-center justify-center text-black/20 text-sm gap-2">
                <p>대화 내용이 없습니다.</p>
             </div>
           )
         )}
       </div>
 
-      {/* 3. 입력창 (Footer) */}
-      <div className="bg-white px-3 py-2 flex-shrink-0 border-t border-[#ebebeb]">
-        <div className="flex items-center gap-2">
-            <div className="flex gap-2 shrink-0 text-gray-400">
-                 <Paperclip size={20} className="cursor-pointer hover:text-gray-600" />
-                 <Smile size={20} className="cursor-pointer hover:text-gray-600" />
-            </div>
-
+      {/* 입력창 */}
+      <div className="flex-none bg-white p-4 border-t border-[#ececec] z-20">
+        <div className="flex flex-col bg-[#f5f5f5] rounded-[20px] px-4 py-3 border border-transparent focus-within:bg-white focus-within:border-[#dcdcdc] transition-all shadow-sm">
             <textarea 
-                className="flex-1 resize-none text-[13px] text-gray-800 placeholder-gray-300 focus:outline-none h-[36px] py-2 px-1 leading-normal"
-                placeholder="메시지를 입력하세요"
+                className="w-full resize-none text-[14px] text-[#1e1e1e] placeholder:text-[#999] bg-transparent border-none focus:ring-0 p-0 min-h-[60px] max-h-[150px] leading-relaxed custom-scrollbar mb-2"
+                placeholder="메시지 입력"
+                rows={2}
             />
-
-            <button className="bg-[#feec34] hover:bg-[#f5e11b] text-black text-[12px] px-3 py-1.5 rounded-[4px] font-medium transition-colors shrink-0">
-                전송
-            </button>
+            <div className="flex justify-between items-center">
+                <div className="flex gap-4 text-[#777]">
+                    <Smile size={22} strokeWidth={1.5} className="cursor-pointer hover:text-black transition-colors" />
+                    <Paperclip size={22} strokeWidth={1.5} className="cursor-pointer hover:text-black transition-colors" />
+                </div>
+                <button 
+                    className="bg-[#FEE500] hover:bg-[#fdd835] text-[#1e1e1e] px-4 py-1.5 rounded-[12px] text-[12px] font-semibold transition-colors shadow-sm"
+                >
+                    전송
+                </button>
+            </div>
         </div>
       </div>
     </div>
