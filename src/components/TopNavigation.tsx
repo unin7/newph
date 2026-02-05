@@ -1,80 +1,159 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Calendar, Radio, Twitter, Zap, ShoppingBag } from 'lucide-react';
-import { cn } from '../lib/utils'; // cn 유틸리티가 없다면 className 문자열로 대체 가능
+import { Calendar, Zap, Radio, Twitter, ShoppingBag, Sparkles, Menu, X } from 'lucide-react';
 
-const navItems = [
-  { path: '/news/schedule', label: '일정', desc: '주요 스케줄', icon: Calendar },
-  { path: '/news/broadcast', label: '방송', desc: '실시간 생방송', icon: Radio },
-  { path: '/news/twitter', label: '타임라인', desc: '최신 소식', icon: Twitter },
-  { path: '/activities', label: '활동', desc: '참여형 콘텐츠', icon: Zap },
-  { path: '/others/goods', label: '교환소', desc: '굿즈 거래', icon: ShoppingBag },
+const NAV_ITEMS = [
+  { path: '/schedule', icon: Calendar, label: '일정', theme: 'blue' },
+  { path: '/activities', icon: Zap, label: '활동', theme: 'pink' },
+  { path: '/broadcast', icon: Radio, label: '방송', theme: 'purple' },
+  { path: '/timeline', icon: Twitter, label: '타임라인', theme: 'indigo' },
+  { path: '/goods', icon: ShoppingBag, label: '교환소', theme: 'emerald' },
 ];
 
 export function TopNavigation() {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const getThemeStyles = (theme: string, isActive: boolean) => {
+    // ✅ 버튼 둥글기 수정: rounded-full -> rounded-xl (조금 더 네모난 형태)
+    const baseContainer = "transition-all duration-200 ease-out group active:scale-95 rounded-xl border"; 
+    
+    const inactiveContainer = `${baseContainer} bg-transparent border-transparent hover:bg-white/80 hover:shadow-sm active:bg-gray-50`;
+    const inactiveIcon = "bg-white text-gray-300 border border-slate-100 group-hover:border-slate-200";
+    const inactiveText = "text-gray-500";
+
+    const themes: Record<string, any> = {
+      blue: {
+        container: isActive 
+          ? `${baseContainer} bg-white/90 border-blue-200 shadow-md ring-1 ring-blue-100 scale-[1.02]` 
+          : `${inactiveContainer} hover:border-blue-100 active:bg-blue-50`,
+        icon: isActive 
+          ? "bg-gradient-to-br from-blue-400 to-cyan-400 text-white shadow-blue-200 border-transparent" 
+          : `${inactiveIcon} group-hover:text-blue-400`,
+        text: isActive ? "text-blue-900" : inactiveText
+      },
+      pink: {
+        container: isActive 
+          ? `${baseContainer} bg-white/90 border-pink-200 shadow-md ring-1 ring-pink-100 scale-[1.02]` 
+          : `${inactiveContainer} hover:border-pink-100 active:bg-pink-50`,
+        icon: isActive 
+          ? "bg-gradient-to-br from-pink-400 to-rose-400 text-white shadow-pink-200 border-transparent" 
+          : `${inactiveIcon} group-hover:text-pink-400`,
+        text: isActive ? "text-pink-900" : inactiveText
+      },
+      purple: {
+        container: isActive 
+          ? `${baseContainer} bg-white/90 border-purple-200 shadow-md ring-1 ring-purple-100 scale-[1.02]` 
+          : `${inactiveContainer} hover:border-purple-100 active:bg-purple-50`,
+        icon: isActive 
+          ? "bg-gradient-to-br from-purple-400 to-violet-400 text-white shadow-purple-200 border-transparent" 
+          : `${inactiveIcon} group-hover:text-purple-400`,
+        text: isActive ? "text-purple-900" : inactiveText
+      },
+      indigo: {
+        container: isActive 
+          ? `${baseContainer} bg-white/90 border-indigo-200 shadow-md ring-1 ring-indigo-100 scale-[1.02]` 
+          : `${inactiveContainer} hover:border-indigo-100 active:bg-indigo-50`,
+        icon: isActive 
+          ? "bg-gradient-to-br from-indigo-400 to-violet-400 text-white shadow-indigo-200 border-transparent" 
+          : `${inactiveIcon} group-hover:text-indigo-400`,
+        text: isActive ? "text-indigo-900" : inactiveText
+      },
+      emerald: {
+        container: isActive 
+          ? `${baseContainer} bg-white/90 border-emerald-200 shadow-md ring-1 ring-emerald-100 scale-[1.02]` 
+          : `${inactiveContainer} hover:border-emerald-100 active:bg-emerald-50`,
+        icon: isActive 
+          ? "bg-gradient-to-br from-emerald-400 to-teal-400 text-white shadow-emerald-200 border-transparent" 
+          : `${inactiveIcon} group-hover:text-emerald-400`,
+        text: isActive ? "text-emerald-900" : inactiveText
+      },
+    };
+
+    return themes[theme] || themes['blue'];
+  };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl flex-none">
-      {/* 컨테이너: 모바일(세로 배치), 데스크탑(가로 배치) */}
-      <div className="w-full px-4 py-2 md:px-8 md:h-20 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
-        
-        {/* 1. 로고 (좌측) */}
-        <Link to="/" className="group flex items-center gap-2 min-w-max self-start md:self-auto py-1">
-          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-100 to-pink-100 group-hover:from-blue-200 group-hover:to-pink-200 transition-colors">
-            <Sparkles className="h-5 w-5 text-indigo-500 transition-transform duration-500 group-hover:rotate-180" />
-          </div>
-          <h1 className="font-extrabold text-2xl tracking-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500">Pastel</span>
-            <span className="text-slate-700">hub</span>
-          </h1>
-        </Link>
+    <>
+      {/* ✅ 상단바 높이 수정: h-[72px] -> h-[80px] */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/60 shadow-sm h-[80px]">
+        <div className="w-full h-full max-w-[1700px] mx-auto px-4 md:px-6 flex items-center justify-between">
+          
+          {/* 로고 */}
+          <Link to="/" className="flex items-center gap-2 group z-50">
+            <Sparkles className="size-6 text-indigo-400 transition-transform duration-500 group-hover:rotate-180" />
+            <h1 className="font-extrabold text-2xl tracking-tight text-slate-800">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">pastel</span>
+              hub
+            </h1>
+          </Link>
 
-        {/* 2. 메뉴 (우측) - 아이콘+제목+설명 구조 */}
-        <div className="flex items-center w-full md:w-auto overflow-x-auto no-scrollbar gap-2 md:gap-6 pb-1 md:pb-0">
-          {navItems.map((menu) => {
-            const isActive = location.pathname.startsWith(menu.path);
-            return (
-              <Link 
-                key={menu.path} 
-                to={menu.path} 
-                className={cn(
-                  "group relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 min-w-max",
-                  isActive ? "bg-indigo-50/80" : "hover:bg-gray-50"
-                )}
-              >
-                {/* 아이콘 */}
-                <div className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full transition-colors",
-                  isActive ? "bg-white text-indigo-600 shadow-sm" : "bg-gray-100 text-gray-500 group-hover:bg-white group-hover:text-indigo-500 group-hover:shadow-sm"
-                )}>
-                  <menu.icon className="size-4" />
-                </div>
+          {/* PC 메뉴 */}
+          <nav className="hidden md:flex items-center gap-3">
+            {NAV_ITEMS.map((item) => {
+              const isActive = location.pathname.startsWith(item.path);
+              const themeStyle = getThemeStyles(item.theme, isActive);
 
-                {/* 텍스트 (제목 + 설명) */}
-                <div className="flex flex-col">
-                  <span className={cn(
-                    "text-[13px] font-bold leading-none mb-0.5 transition-colors",
-                    isActive ? "text-indigo-900" : "text-gray-700 group-hover:text-gray-900"
-                  )}>
-                    {menu.label}
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-2.5 px-5 py-2.5 ${themeStyle.container}`}
+                >
+                  {/* 아이콘 둥글기도 rounded-lg로 변경하여 네모난 느낌 통일 */}
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300 shadow-sm ${themeStyle.icon}`}>
+                    <item.icon className="size-4" />
+                  </div>
+                  <span className={`text-sm font-bold transition-colors duration-200 ${themeStyle.text}`}>
+                    {item.label}
                   </span>
-                  <span className={cn(
-                    "text-[10px] leading-none transition-colors",
-                    isActive ? "text-indigo-400" : "text-gray-400 group-hover:text-gray-500"
-                  )}>
-                    {menu.desc}
-                  </span>
-                </div>
+                </Link>
+              );
+            })}
+          </nav>
 
-                {/* 활성 상태 표시 바 (데스크탑 하단) */}
-                {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[3px] bg-indigo-500 rounded-t-full hidden md:block" />
-                )}
-              </Link>
-            );
-          })}
+          {/* 모바일 햄버거 버튼 */}
+          <button 
+            className="md:hidden p-2 text-slate-500 hover:bg-slate-100 active:bg-slate-200 rounded-xl transition-all"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="size-7" /> : <Menu className="size-7" />}
+          </button>
         </div>
-      </div>
-    </nav>
+      </header>
+
+      {/* ✅ 모바일 메뉴 가로 배치 수정 */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed top-[80px] left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xl z-40 animate-in slide-in-from-top-2 fade-in duration-200">
+          {/* grid-cols-5를 사용하여 5개를 무조건 가로 한 줄로 배치 */}
+          <div className="p-4 grid grid-cols-5 gap-2"> 
+            {NAV_ITEMS.map((item) => {
+              const isActive = location.pathname.startsWith(item.path);
+              const themeStyle = getThemeStyles(item.theme, isActive);
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  // flex-col로 아이콘 위, 텍스트 아래 배치
+                  className={`flex flex-col items-center justify-center gap-1.5 py-3 ${themeStyle.container}`}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-lg shadow-sm transition-all duration-300 ${themeStyle.icon}`}>
+                    <item.icon className="size-5" />
+                  </div>
+                  <span className={`text-[10px] font-bold ${themeStyle.text}`}>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

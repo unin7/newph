@@ -1,30 +1,33 @@
-import React from "react";
-import { TopNavigation } from "./TopNavigation";
-import { AppSidebar } from "./AppSidebar";
-import { SidebarProvider } from "./ui/sidebar";
+import { Outlet } from 'react-router-dom';
+import { TopNavigation } from './TopNavigation';
+import { AppSidebar } from './AppSidebar';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout() {
   return (
-    // 배경: 아주 연한 그라데이션으로 시안의 뽀샤시한 느낌 구현
-    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen flex flex-col font-sans text-slate-900 bg-[#f8f9fa]">
       
-      {/* 네비게이션 */}
+      {/* 1. 상단바 */}
       <TopNavigation />
-      
-      {/* 메인 콘텐츠 영역 */}
-      <SidebarProvider defaultOpen={true} className="flex-1 flex overflow-hidden h-[calc(100vh-80px)]">
-        <div className="flex w-full h-full max-w-[1920px] mx-auto">
-          {/* 사이드바 (모바일 Hidden) */}
-          <AppSidebar />
-          
-          {/* 메인 뷰 */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
-            <div className="mx-auto max-w-6xl">
-              {children}
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
+
+      {/* 2. 메인 컨테이너 */}
+      <div className="flex flex-1 w-full max-w-[1700px] mx-auto">
+        
+        {/* 3. 사이드바 (PC 전용) */}
+        {/* hidden lg:block: 모바일에선 숨기고, 큰 화면에서만 보임 */}
+        {/* w-[280px]: 너비 고정 */}
+        <aside className="hidden lg:block flex-none w-[280px]">
+          {/* top-[80px]: 상단바 높이(80px)만큼 띄우고 고정 */}
+          <div className="sticky top-[80px] h-[calc(100vh-80px)] py-6 pl-6 pr-2">
+            <AppSidebar />
+          </div>
+        </aside>
+
+        {/* 4. 메인 콘텐츠 */}
+        <main className="flex-1 min-w-0 px-4 py-6 md:px-8">
+          <Outlet />
+        </main>
+        
+      </div>
     </div>
   );
 }
